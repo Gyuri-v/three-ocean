@@ -5,7 +5,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Water } from 'three/addons/objects/Water.js';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { GUI } from 'dat.gui'
+import { GUI } from 'dat.gui';
+
+import Floater from './floater.js'
+import GerstnerWater from './gerstnerWater.js'
 
 
 function main () {
@@ -24,6 +27,7 @@ function main () {
     // renderer
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor('#000', 1.0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setSize(areaWidth, areaHeight);
     $canvas = renderer.domElement;
     $container.append($canvas);
@@ -33,7 +37,8 @@ function main () {
 
     // camera
     camera = new THREE.PerspectiveCamera(60, areaWidth/areaHeight, 1, 1000);
-    camera.position.set(2, 5, -12);
+    camera.position.set(50, 50, -150);
+    camera.lookAt(0, 0, 0);
     scene.add(camera);
 
     // light
@@ -64,10 +69,10 @@ function main () {
     scene.add(mesh);
 
     // fog
-    scene.fog = new THREE.FogExp2(0x909497, 0.05);
+    // scene.fog = new THREE.FogExp2(0x909497, 0.05);
 
     // water
-    const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+    const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
     water = new Water(
       waterGeometry,
       {
@@ -78,8 +83,8 @@ function main () {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         }),
         sunDirection: new THREE.Vector3(),
-        sunColor: '#fff',
-        waterColor: '#002044',
+        sunColor: '#ff3636',
+        waterColor: '#070e4c',
         distortionScale: 3.7,
         fog: scene.fog !== undefined,
       }
@@ -90,18 +95,18 @@ function main () {
 
     // sky
     const sky = new Sky();
-    sky.scale.setScalar(1000);
+    sky.scale.setScalar(10000);
     scene.add(sky);
     
     const skyUniforms = sky.material.uniforms;
 
-    skyUniforms['turbidity'].value = 110;
+    skyUniforms['turbidity'].value = 10;
     skyUniforms[ 'rayleigh' ].value = 2;
     skyUniforms[ 'mieCoefficient' ].value = 0.005;
     skyUniforms[ 'mieDirectionalG' ].value = 0.8;
 
     const parameters = {
-      elevation: 10,
+      elevation: 1,
       azimuth: 180
     };
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
