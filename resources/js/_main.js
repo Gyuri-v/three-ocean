@@ -153,7 +153,7 @@ function createPlane(layerId, x, y, divisor) {
         planes[id].geometry.computeVertexNormals()
         planes[id].geometry.attributes.position.needsUpdate = true
     }
-    hgtImage.src = '/tiles_hgt/' + layerId + '_' + (y + offsetY) + '_' + (x + offsetX) + '.png'
+    hgtImage.src = 'resources/tiles_hgt/' + layerId + '_' + (y + offsetY) + '_' + (x + offsetX) + '.png'
     const tileUrl = 'resources/tiles/' + layerId + '_' + (y + offsetY) + '_' + (x + offsetX) + '.jpg'
     textureLoader.load(tileUrl, (t) => {
         planes[id].material.map = t
