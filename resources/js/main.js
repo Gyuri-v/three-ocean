@@ -19,6 +19,7 @@ function main () {
   // WORLD
   let renderer, scene, camera, light, controls, gui;
   let water, sun;
+  let gerstnerWater, floater;
 
   // VALUE
   let areaWidth, areaHeight;
@@ -60,43 +61,40 @@ function main () {
 
   // OCEAN
   function setEnvironment () {
-    // temp box
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 'red', side: THREE.DoubleSide })
-    );
-    mesh.position.set(0, 0, 0);
-    scene.add(mesh);
-
+    const earth = new THREE.Group();
+    scene.add(earth);
+    
     // fog
     // scene.fog = new THREE.FogExp2(0x909497, 0.05);
 
     // water
-    const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
-    water = new Water(
-      waterGeometry,
-      {
-        time: 5,
-        textureWidth: 512,
-        textureHeight: 512,
-        waterNormals: new THREE.TextureLoader().load('resources/textures/waternormals.jpg', (texture) => {
-          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        }),
-        sunDirection: new THREE.Vector3(),
-        sunColor: '#ff3636',
-        waterColor: '#070e4c',
-        distortionScale: 3.7,
-        fog: scene.fog !== undefined,
-      }
-    );
-    water.material.side = THREE.DoubleSide;
-    water.rotation.x = -Math.PI / 2;
-    scene.add(water);
+    // const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+    // water = new Water(
+    //   waterGeometry,
+    //   {
+    //     time: 5,
+    //     textureWidth: 512,
+    //     textureHeight: 512,
+    //     waterNormals: new THREE.TextureLoader().load('resources/textures/waternormals.jpg', (texture) => {
+    //       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //     }),
+    //     sunDirection: new THREE.Vector3(),
+    //     sunColor: '#ff3636',
+    //     waterColor: '#070e4c',
+    //     distortionScale: 3.7,
+    //     fog: scene.fog !== undefined,
+    //   }
+    // );
+    // water.material.side = THREE.DoubleSide;
+    // water.rotation.x = -Math.PI / 2;
+    // scene.add(water);
+    gerstnerWater = new GerstnerWater(gui);
+    earth.add(gerstnerWater.water);
 
     // sky
     const sky = new Sky();
     sky.scale.setScalar(10000);
-    scene.add(sky);
+    earth.add(sky);
     
     const skyUniforms = sky.material.uniforms;
 
@@ -123,23 +121,41 @@ function main () {
       sun.setFromSphericalCoords(1, phi, theta); // setFromSphericalCoords(radius, phi, theta) 구형좌표 반경 설정. phi 및 theta에서 이 벡터를 설정
 
       sky.material.uniforms['sunPosition'].value.copy(sun);
-      water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+      // water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+      gerstnerWater.water.material.uniforms['sunDirection'].value.copy(sun);
       
       if ( renderTarget !== undefined ) renderTarget.dispose();
       
       sceneEnv.add(sky);
       renderTarget = pmremGenerator.fromScene(sceneEnv);
-      scene.add(sky);
+      earth.add(sky);
 
       scene.environment = renderTarget.texture;
     }
     updateSun();
+
+
+    // temp box
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(10, 10, 30),
+      new THREE.MeshStandardMaterial({ color: 'red', side: THREE.DoubleSide })
+    );
+    mesh.position.set(0, 0, 0);
+    earth.add(mesh);
+
+    floater = new Floater(earth, mesh, gerstnerWater, true);
+    
   }
 
   // RENDER
+  const clock = new THREE.Clock();
+  let delta = 0;
   function render (time, deltaTime) {
-    water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+    // water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+    delta = clock.getDelta();
+    gerstnerWater.water.material.uniforms['offsetX'] && floater && floater.update(delta)
 
+    gerstnerWater && gerstnerWater.update(delta);
     controls.update();
       
     renderer.setSize(areaWidth, areaHeight);

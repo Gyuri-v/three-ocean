@@ -8,7 +8,7 @@ export default class GerstnerWater {
 
     constructor(gui) {
         const waterGeometry = new THREE.PlaneGeometry(4096, 4096, 256, 256)
-        this.texture = new THREE.TextureLoader().load('../img/waternormals.jpg', function (texture) {
+        this.texture = new THREE.TextureLoader().load('resources/img/waternormals.jpg', function (texture) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping
         })
 
