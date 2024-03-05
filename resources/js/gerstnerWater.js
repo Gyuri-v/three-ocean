@@ -24,9 +24,10 @@ export default class GerstnerWater {
             waterNormals: this.texture,
             sunDirection: new THREE.Vector3(),
             sunColor: 0xffffff,
-            waterColor: 0x001e0f,
+            waterColor: '#060d20',
             distortionScale: 8,
             fog: undefined,
+            side: THREE.DoubleSide,
         })
 
         this.water.material.wireframe = false
