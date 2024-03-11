@@ -16,6 +16,7 @@ function main () {
   // WORLD
   let renderer, scene, camera, light, controls, gui;
   let water, sun, boat;
+  let boatSize = { size: null, width: 0, height: 0, depth: 0 }
   let gerstnerWater, floater;
 
   // VALUE
@@ -35,7 +36,7 @@ function main () {
 
     // camera
     camera = new THREE.PerspectiveCamera(60, areaWidth/areaHeight, 1, 1000);
-    camera.position.set(10, 10, -20);
+    camera.position.set(30, 30, -60);
     camera.lookAt(0, 0, 0);
     scene.add(camera);
 
@@ -45,6 +46,10 @@ function main () {
 
     // controls
     controls = new OrbitControls( camera, renderer.domElement );
+
+    // helper
+    const axesHelper = new THREE.AxesHelper(3);
+    scene.add(axesHelper);
 
     // gui
     gui = new GUI()
@@ -71,17 +76,38 @@ function main () {
 
 
     // boat
+    // boat = new THREE.Group();
     const loader = new GLTFLoader()
     loader.load(
-        'resources/models/boat.glb',
+        'resources/models/cargo_ship/boat.glb',
         function (gltf) {
-            gltf.scene.traverse(function (child) {
-                if (child.isMesh) {
-                    child.material = new THREE.MeshStandardMaterial({ roughness: 0 })
-                    boat = child;
-                }
-            });
-            earth.add(gltf.scene);
+            // gltf.scene.traverse(function (child) {
+            //   if (child.isMesh) {
+            //     console.log(child);
+            //     // child.material = new THREE.MeshStandardMaterial({ roughness: 0 })
+            //     boat.add(child);
+            //   }
+            // });
+            boat = gltf.scene;
+            boat.scale.set(0.5, 0.5, 0.5);
+            boat.position.y = -2;
+            boat.position.x = -6;
+            
+            const size = new THREE.Box3().setFromObject(boat);
+            boatSize.size = size;
+            boatSize.width = size.max.x - size.min.x
+            boatSize.height = size.max.y - size.min.y
+            boatSize.depth = size.max.z - size.min.z
+
+            
+            const float = new THREE.Mesh(
+              new THREE.PlaneGeometry(boatSize.width, boatSize.depth),
+              new THREE.MeshStandardMaterial({ color: 'pink', side: THREE.DoubleSide })
+            );
+            float.position.y = 0.1;
+            float.rotation.x = degToRad(-90);
+            
+            earth.add(float, boat);
         },
         (xhr) => {
             console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
